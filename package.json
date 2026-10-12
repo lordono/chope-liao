@@ -1,0 +1,29 @@
+{
+  "name": "chope-liao",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "A Singapore-flavoured compatibility quiz. Frontend only, no data leaves the device.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "gen:reference": "tsx scripts/gen-reference.ts"
+  },
+  "dependencies": {
+    "gsap": "3.15.0",
+    "jsqr": "1.4.0",
+    "qrcode": "1.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/qrcode": "1.5.6",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vite": "8.3.4",
+    "vitest": "5.0.3"
+  }
+}

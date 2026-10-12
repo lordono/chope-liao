@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en-SG">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Chope Liao · a cheeky compatibility quiz</title>
+    <meta name="description" content="A Singapore-flavoured compatibility quiz. Take it, share your match code, and see how you fit. Nothing leaves your phone." />
+    <meta name="theme-color" content="#2e9e5b" />
+    <meta name="referrer" content="no-referrer" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; media-src 'self' blob: mediastream:; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+  </head>
+  <body>
+    <a class="skip-link" href="#app">Skip to content</a>
+    <header class="site-header">
+      <a id="home-link" class="brand" href="#/"><span class="brand-dot" aria-hidden="true"></span>Chope Liao</a>
+      <nav class="site-nav" aria-label="Main">
+        <a href="#/about">About</a>
+        <button id="motion-toggle" class="chip" type="button" aria-pressed="false">Calm motion</button>
+        <button id="theme-toggle" class="chip icon" type="button" aria-label="Theme: auto. Tap to change.">◐</button>
+      </nav>
+    </header>
+    <main id="app" tabindex="-1"></main>
+    <div id="live" class="sr-only" aria-live="polite"></div>
+    <noscript>Chope Liao needs JavaScript to run the quiz on your device.</noscript>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

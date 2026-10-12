@@ -1,0 +1,10 @@
+{
+  "name": "Chope Liao",
+  "short_name": "Chope Liao",
+  "description": "A cheeky Singapore-flavoured compatibility quiz. Nothing leaves your phone.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#fbf7f0",
+  "theme_color": "#2e9e5b",
+  "icons": [{ "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
