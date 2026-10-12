@@ -4,6 +4,7 @@
  * (scripts/gen-reference.ts) and committed as reference.json.
  */
 import { BANDS, type BandId } from './config';
+import type { ScaleKey } from './calibration';
 import type { UserCategory } from './dimensions';
 import reference from './reference.json';
 
@@ -13,6 +14,8 @@ export interface ReferenceTable {
   mutual: number[];
   /** 101 quantiles per user category. */
   categories: Record<UserCategory, number[]>;
+  /** Weight calibration factors (see calibration.ts). */
+  dimScale: Partial<Record<ScaleKey, number>>;
 }
 
 export const REFERENCE = reference as ReferenceTable;

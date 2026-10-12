@@ -29,6 +29,7 @@ import {
   SECURITY_WEIGHT,
   STATED_PREFERENCE_BLEND,
 } from './config';
+import { dimScale } from './calibration';
 import type { Profile } from './types';
 
 const BLEND = STATED_PREFERENCE_BLEND;
@@ -59,7 +60,9 @@ export function idealFor(a: Profile, d: Dim): number {
 /** How much A cares about `d` (before normalisation). */
 export function weightFor(a: Profile, b: Profile, d: Dim): number {
   const cfg = DIMENSION_CONFIG[d];
-  let w = cfg.weight;
+  // dimScale evens out how much each dimension's fit naturally varies, so the
+  // configured weight is the dimension's real share of influence.
+  let w = cfg.weight * dimScale(d);
   if (isUserCategory(cfg.category)) {
     w *= blend(1, CATEGORY_LEVELS[a.categoryLevels[cfg.category]] ?? 1);
   }
@@ -107,8 +110,9 @@ function weightedFit(a: Profile, b: Profile, dims: readonly Dim[], includeSecuri
     den += w;
   }
   if (includeSecurity) {
-    num += SECURITY_WEIGHT * securityFit(a, b);
-    den += SECURITY_WEIGHT;
+    const w = SECURITY_WEIGHT * dimScale('security');
+    num += w * securityFit(a, b);
+    den += w;
   }
   return den > 0 ? clamp01(num / den) : 0.5;
 }

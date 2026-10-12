@@ -39,11 +39,12 @@ src/
     score.ts         directionalScore, mutualScore, category scores, highlights
     dealbreakers.ts  "worth a kopi chat" topics + Party Mode penalty
     percentile.ts    percentile bands from the reference table
-    reference.json   generated quantile table (commit it)
+    reference.json   generated quantile table + weight calibration (commit it)
+    calibration.ts   per-dimension scale factors so weights mean what they say
     matching.ts      Gale–Shapley, Irving's stable roommates, greedy fallback
     profileType.ts   16 fun profile-card types
     synth.ts         synthetic people for the reference population and tests
-  data/questions.ts  the question bank (73 items), stations, dealbreaker copy
+  data/questions.ts  the question bank (144 items), stations, dealbreaker copy
   ui/                screens, router, components (QR, scanner, card, MRT bar)
   anim/              GSAP animations, each with a reduced-motion fallback
 scripts/gen-reference.ts
@@ -83,6 +84,13 @@ average of per-dimension fits:
 
 **Weights:**
 - Base weights come from `dimensions.ts`.
+- Each weight is then **calibrated** (`calibration.ts`). Some dimensions' fits
+  naturally vary more across pairs than others, which would let them swing the
+  score more than their weight says. `pnpm gen:reference` measures each
+  dimension's spread on the synthetic population and stores a scale factor in
+  `reference.json`. As a result, each category's real pull on the score matches
+  its configured share to within a few points. `tests/weightage.test.ts`
+  guards this.
 - They're multiplied by the person's category priorities and the strength of any
   stated ideals, both blended 50/50 with defaults.
 - Stated preferences predict real attraction poorly, so they only move weights
@@ -153,8 +161,10 @@ evidence per session.
 | Party Mode strictness | `PARTY_THRESHOLDS`, `SOFT_DEALBREAKER_PENALTY` (`config.ts`) |
 | Synthetic population realism | `CHOICE_BETA`, `CORRELATIONS`, `MEANS` (`synth.ts`) |
 
-After any scoring change, run `pnpm gen:reference && pnpm test`. The calibration
-test checks that fresh pairs from a different seed land near uniform percentiles.
+After any change to questions or scoring, run `pnpm gen:reference && pnpm test`.
+The tests check two things: fresh pairs from a different seed land near uniform
+percentiles, and each category's real influence stays within 4 points of its
+configured share.
 
 ## Match code format (v1)
 

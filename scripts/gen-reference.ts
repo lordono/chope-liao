@@ -10,9 +10,10 @@
  */
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { USER_CATEGORIES } from '../src/engine/dimensions';
+import { setDimScales, type ScaleKey } from '../src/engine/calibration';
+import { DIMENSIONS, DIMENSION_CONFIG, USER_CATEGORIES } from '../src/engine/dimensions';
 import { mulberry32 } from '../src/engine/rng';
-import { categoryScores, mutualScore } from '../src/engine/score';
+import { categoryScores, dimensionFit, mutualScore, securityFit } from '../src/engine/score';
 import { synthProfile } from '../src/engine/synth';
 import type { ReferenceTable } from '../src/engine/percentile';
 
@@ -31,9 +32,36 @@ export function quantiles(values: number[], points: number): number[] {
   });
 }
 
+function sd(values: number[]): number {
+  const m = values.reduce((s, v) => s + v, 0) / values.length;
+  return Math.sqrt(values.reduce((s, v) => s + (v - m) ** 2, 0) / values.length);
+}
+
+/**
+ * Scale = (average spread) / (this dimension's spread) of its fit across
+ * random pairs, so every dimension moves the score in proportion to its
+ * configured weight. Clamped so a near-constant dimension can't explode.
+ */
+export function measureScales(pop: ReturnType<typeof synthProfile>[], rng: () => number, samples = 20_000): Partial<Record<ScaleKey, number>> {
+  const keys: ScaleKey[] = [...DIMENSIONS.filter((d) => DIMENSION_CONFIG[d].rule !== 'pairPattern'), 'security'];
+  const fits: Record<string, number[]> = Object.fromEntries(keys.map((k) => [k, []]));
+  for (let k = 0; k < samples; k++) {
+    const a = pop[Math.floor(rng() * pop.length)]!;
+    const b = pop[Math.floor(rng() * pop.length)]!;
+    for (const key of keys) fits[key]!.push(key === 'security' ? securityFit(a, b) : dimensionFit(a, b, key));
+  }
+  const spreads = Object.fromEntries(keys.map((k) => [k, sd(fits[k]!)]));
+  const avg = keys.reduce((s, k) => s + spreads[k]!, 0) / keys.length;
+  return Object.fromEntries(keys.map((k) => [k, Math.round(Math.min(3, Math.max(1 / 3, avg / spreads[k]!)) * 1000) / 1000]));
+}
+
 export function buildReference(seed: number, people = PEOPLE, pairs = PAIRS): ReferenceTable {
   const rng = mulberry32(seed);
   const pop = Array.from({ length: people }, () => synthProfile(rng));
+  // Pass 1: measure spreads with no calibration; pass 2: score with it.
+  setDimScales({});
+  const dimScale = measureScales(pop, rng);
+  setDimScales(dimScale);
   const mutual: number[] = [];
   const cats: Record<string, number[]> = Object.fromEntries(USER_CATEGORIES.map((c) => [c, []]));
   for (let k = 0; k < pairs; k++) {
@@ -50,6 +78,7 @@ export function buildReference(seed: number, people = PEOPLE, pairs = PAIRS): Re
     meta: { seed, people, pairs, generated: new Date().toISOString().slice(0, 10) },
     mutual: quantiles(mutual, 1001),
     categories: Object.fromEntries(USER_CATEGORIES.map((c) => [c, quantiles(cats[c]!, 101)])) as ReferenceTable['categories'],
+    dimScale,
   };
 }
 
