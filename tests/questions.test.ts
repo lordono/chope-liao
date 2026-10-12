@@ -3,7 +3,7 @@ import { FAITH_OPTIONS, FLAVOUR, QUESTION_BANK, SCENARIOS } from '../src/data/qu
 import { DIMENSIONS } from '../src/engine/dimensions';
 import { contradicts, computeProfile } from '../src/engine/profile';
 import { mulberry32 } from '../src/engine/rng';
-import { MIN_EVIDENCE, drawSession, evidenceMass } from '../src/engine/sampler';
+import { drawSession, evidenceMass, minEvidence } from '../src/engine/sampler';
 import type { Answers } from '../src/engine/types';
 
 describe('question bank', () => {
@@ -59,7 +59,7 @@ describe('sessions', () => {
         if (q.kind !== 'lifestyle' && q.kind !== 'scenario') continue;
         for (const [d, m] of Object.entries(evidenceMass(q))) have[d] = (have[d] ?? 0) + m;
       }
-      for (const d of DIMENSIONS) expect(have[d] ?? 0, `${d} seed ${seed}`).toBeGreaterThanOrEqual(MIN_EVIDENCE);
+      for (const d of DIMENSIONS) expect(have[d] ?? 0, `${d} seed ${seed}`).toBeGreaterThanOrEqual(minEvidence(d));
       expect(s.items.filter((i) => i.question.kind === 'dealbreaker')).toHaveLength(5);
     }
   });

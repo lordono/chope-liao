@@ -7,7 +7,7 @@
  *   Serious Bit Station (dealbreakers) → Supper Terminal (light finish)
  */
 import { DEALBREAKERS, FLAVOUR, IDEALS, LIFESTYLE, PRIORITIES, SCENARIOS, type StationId } from '../data/questions';
-import { DIMENSIONS, type Dim, type UserCategory } from './dimensions';
+import { DIMENSIONS, DIMENSION_CONFIG, type Dim, type UserCategory } from './dimensions';
 import { shuffle, type Rng } from './rng';
 import type { ChoiceQuestion, IdealQuestion, PriorityQuestion, Question } from './types';
 
@@ -23,6 +23,12 @@ export const SESSION_MIX = {
 
 /** Minimum evidence mass (sum of max |loading| across chosen items) per dimension. */
 export const MIN_EVIDENCE = 1.5;
+/** Life-direction dimensions carry the most weight, so they need more evidence. */
+export const MIN_EVIDENCE_DIRECTION = 2.5;
+
+export function minEvidence(d: Dim): number {
+  return DIMENSION_CONFIG[d].category === 'direction' ? MIN_EVIDENCE_DIRECTION : MIN_EVIDENCE;
+}
 
 export interface SessionItem {
   question: Question;
@@ -81,7 +87,7 @@ function pickChoiceItems(rng: Rng): { lifestyle: ChoiceQuestion[]; scenarios: Ch
     for (const q of pool) {
       let gain = 0;
       for (const [d, m] of Object.entries(evidenceMass(q)) as [Dim, number][]) {
-        gain += Math.min(Math.max(MIN_EVIDENCE - have[d], 0), m);
+        gain += Math.min(Math.max(minEvidence(d) - have[d], 0), m);
       }
       // Randomness keeps sessions varied once coverage is satisfied.
       const score = gain + rng() * 0.6;

@@ -14,7 +14,7 @@ import { setDimScales, type ScaleKey } from '../src/engine/calibration';
 import { DIMENSIONS, DIMENSION_CONFIG, USER_CATEGORIES } from '../src/engine/dimensions';
 import { mulberry32 } from '../src/engine/rng';
 import { categoryScores, dimensionFit, mutualScore, securityFit } from '../src/engine/score';
-import { synthProfile } from '../src/engine/synth';
+import { DEFAULT_SYNTH, synthProfile, type SynthConfig } from '../src/engine/synth';
 import type { ReferenceTable } from '../src/engine/percentile';
 
 export const DEFAULT_SEED = 20261012;
@@ -55,9 +55,9 @@ export function measureScales(pop: ReturnType<typeof synthProfile>[], rng: () =>
   return Object.fromEntries(keys.map((k) => [k, Math.round(Math.min(3, Math.max(1 / 3, avg / spreads[k]!)) * 1000) / 1000]));
 }
 
-export function buildReference(seed: number, people = PEOPLE, pairs = PAIRS): ReferenceTable {
+export function buildReference(seed: number, people = PEOPLE, pairs = PAIRS, config: SynthConfig = DEFAULT_SYNTH): ReferenceTable {
   const rng = mulberry32(seed);
-  const pop = Array.from({ length: people }, () => synthProfile(rng));
+  const pop = Array.from({ length: people }, () => synthProfile(rng, { config }));
   // Pass 1: measure spreads with no calibration; pass 2: score with it.
   setDimScales({});
   const dimScale = measureScales(pop, rng);

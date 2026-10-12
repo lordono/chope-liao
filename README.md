@@ -20,6 +20,7 @@ pnpm test             # Vitest engine tests
 pnpm build            # type-check + production build into dist/
 pnpm preview          # serve the build (service worker active)
 pnpm gen:reference    # regenerate the percentile reference table
+pnpm audit:synth      # realism checks for the synthetic population
 ```
 
 Requires Node 20+ and pnpm. Deploy `dist/` to any static host. It uses relative
@@ -191,9 +192,26 @@ configured share.
 
 ## Known limitations and ideas
 
-- **Synthetic answer distributions are educated guesses**, so percentiles are
-  only as good as `synth.ts`. If you ever collect opt-in, anonymous answer
-  distributions, plug them in there.
+- **Bands depend on the synthetic population.** `synth.ts` uses Singapore
+  data where it exists (Census 2020/GHS 2025 religion, MOH smoking rates, the
+  Marriage & Parenthood Survey). Personality structure follows the Big Five
+  Stability/Plasticity meta-analytic pattern. Run `pnpm audit:synth` to see
+  validity, retest reliability and topic rates.
+  - Sensitivity testing shows the one assumption that really matters is how
+    consistently people answer (`choiceBeta`, tuned to a realistic retest
+    r ≈ 0.65). Varying it by ±30% keeps 84–90% of pairs in the same band.
+    Correlation assumptions barely matter (93–96%, about the same as just
+    changing the random seed).
+  - Real, opt-in answer data would be the only way to pin `choiceBeta` down.
+- **The quiz flattens Big Five intercorrelations.** Forced-choice questions
+  pit traits against each other, so traits that go together in real life
+  (organised and steady, about +0.25) are measured near zero or slightly
+  negative. Each trait is still measured well (median r = 0.72 against the true
+  trait). Rewriting questions so each one contrasts high vs low on the same
+  trait would reduce this.
+- **The faith topic shows up often.** It appears in roughly half of random
+  pairs, because people who don't mind are never asked their faith. Asking
+  everyone (optionally) would make it fire only on a real difference.
 - **The stable matching is unique in practice.** Party scores are symmetric, so
   with no ties the stable matching is the same whichever side proposes. The
   proposing side is still randomised and shown, as specified. Ranking by

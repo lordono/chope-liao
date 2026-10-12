@@ -553,7 +553,7 @@ export const LIFESTYLE: ChoiceQuestion[] = [
       o('Sign up immediately', { openness: 1 }),
       o('Try it once, to be nice', { openness: 0.5, agreeableness: 0.5 }),
       o('Nah, I like my usual hobbies', { openness: -1 }),
-      o('Ask a hundred questions first', { conscientiousness: 0.5, steadiness: -0.5 }),
+      o('Ask a hundred questions first', { conscientiousness: 0.5 }),
     ],
   },
   {
@@ -695,7 +695,7 @@ export const LIFESTYLE: ChoiceQuestion[] = [
     options: [
       o('No problem, I adapt', { steadiness: 1, openness: 0.5 }),
       o('Bit annoyed, but okay', { steadiness: 0 }),
-      o('It throws off my whole day', { steadiness: -1, conscientiousness: 0.5 }),
+      o('It throws off my whole day', { steadiness: -1 }),
       o('Secretly relieved. More home time.', { extraversion: -1 }),
     ],
   },
